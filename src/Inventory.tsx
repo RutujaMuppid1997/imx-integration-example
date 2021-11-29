@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import { Link, ImmutableXClient, ImmutableMethodResults, MintableERC721TokenType } from '@imtbl/imx-sdk';
 import { useEffect, useState } from 'react';
 require('dotenv').config();
+//import * as encUtils from 'enc-utils';
 
 interface InventoryProps {
   client: ImmutableXClient,
@@ -57,19 +58,29 @@ const Inventory = ({client, link, wallet}: InventoryProps) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
+// const hash = keccak256(toUtf8Bytes(JSON.stringify(mintBodyPayload)));
+// const sig = deserializeSignature(await this.signer.signMessage(hash));
+// return encUtils.addHexPrefix(
+//   encUtils.padLeft(sig.r.toString(16), 64) +
+//   encUtils.padLeft(sig.s.toString(16), 64) +
+//   encUtils.padLeft(sig.recoveryParam?.toString(16) || '', 2),
+// );
+
+
   // the minting function should be on your backend
   async function mint() {
     // initialise a client with the minter for your NFT smart contract
     const provider = new ethers.providers.JsonRpcProvider(`https://eth-ropsten.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}`);
     const minterPrivateKey: string = process.env.REACT_APP_MINTER_PK ?? ''; // registered minter for your contract
-    const minter = new ethers.Wallet(minterPrivateKey).connect(provider);
+    const minter: any = new ethers.Wallet(minterPrivateKey).connect(provider);
     const publicApiUrl: string = process.env.REACT_APP_ROPSTEN_ENV_URL ?? '';
     const starkContractAddress: string = process.env.REACT_APP_ROPSTEN_STARK_CONTRACT_ADDRESS ?? '';
     const registrationContractAddress: string = process.env.REACT_APP_ROPSTEN_REGISTRATION_ADDRESS ?? '';
+    const signer:any = provider.getSigner()
     const minterClient = await ImmutableXClient.build({
         publicApiUrl,
-        signer: minter,
         starkContractAddress,
+        signer: minter,
         registrationContractAddress,
     })
 
@@ -89,8 +100,10 @@ const Inventory = ({client, link, wallet}: InventoryProps) => {
           nonce: random().toString(10),
           authSignature: ''
       }]
-    });
-    console.log(`Token minted: ${result.results[0].token_id}`);
+    }).catch((e) => {
+      console.error( e);
+  });;
+    //console.log(`Token minted: ${result.results[0].token_id}`);
     setInventory(await client.getAssets({user: wallet, sell_orders: true}))
   };
 
@@ -104,7 +117,6 @@ async function mintv2() {
     const registrationContractAddress: string = process.env.REACT_APP_ROPSTEN_REGISTRATION_ADDRESS ?? '';
     const minterClient = await ImmutableXClient.build({
         publicApiUrl,
-        signer: minter,
         starkContractAddress,
         registrationContractAddress,
     })
