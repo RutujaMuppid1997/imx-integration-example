@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import Marketplace from './Marketplace';
 import Inventory from './Inventory';
 import Bridging from './Bridging';
+import Transfer from './transfer'
 require('dotenv').config();
-
+ 
 const App = () => {
   // initialise Immutable X Link SDK
   const link = new Link(process.env.REACT_APP_ROPSTEN_LINK_URL)
@@ -51,6 +52,13 @@ const App = () => {
             link={link}
             wallet={wallet}
           />
+          case 'transfer':
+            if (wallet === 'undefined') return <div>Connect wallet</div>
+            return <Transfer
+              client={client}
+              link={link}
+              wallet={wallet}
+            />
         default:
           return <Marketplace
             client={client}
@@ -73,9 +81,11 @@ const App = () => {
       <button onClick={() => setTab('marketplace')}>Marketplace</button>
       <button onClick={() => setTab('inventory')}>Inventory</button>
       <button onClick={() => setTab('bridging')}>Deposit and withdrawal</button>
+      <button onClick={() => setTab('transfer')}>Transfer</button>
+
       <br/><br/><br/>
       {handleTabs()}
-    </div>
+    </div> 
   );
 }
 
